@@ -18,7 +18,18 @@
   # Everyone gets zsh
   environment.shells = with pkgs; [ zsh ];
   users.defaultUserShell = pkgs.zsh;
-  programs.zsh.enable = true;
+  programs.zsh = {
+    enable = true;
+    autosuggestions.enable = true;
+    ohMyZsh = {
+         enable = true;
+         theme = "robbyrussell";
+         plugins = [
+           "git"
+           "history"
+         ];
+    };
+   };
 
   #NIXOS Enable Flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -64,9 +75,20 @@
   users.users.bohlea = {
     isNormalUser = true;
     description = "Adam Bohle";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" ];
+    openssh.authorizedKeys.keys = [ "ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBAEoR8V/p9dOKHHQqZvvnX1tp2808jHJZA9EKmjUePZrAeP3wTINQCNEYzH+ZNO1do/DYbGXoSOIGtkvuH2MV2/KUgCaF5/I5ahQ/HjaQ5O6tokqz2YDTktYJrQymomkAb+VyoZWdvX94n5YuqGrxW8lgqkuAFmBAqewVgkJ8bclmAqUNw== bohlea@Adams-Air.localdomain" ];
     packages = with pkgs; [];
   };
+  
+  security.sudo.extraRules= [
+    {  users = [ "bohlea" ];
+       commands = [
+       { command = "ALL" ;
+         options= [ "NOPASSWD" ];
+       }
+     ];
+   }
+  ];
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -88,7 +110,14 @@
     kubectl
     home-manager
     fastfetch
+    oh-my-posh
+    btop
+    docker-compose
   ];
+
+  virtualisation.docker = {
+    enable = true;
+    };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -100,7 +129,10 @@
 
   # List services that you want to enable:
   # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
+  services.openssh = {
+    enable = true;
+    settings.PasswordAuthentication = false;
+  };
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
